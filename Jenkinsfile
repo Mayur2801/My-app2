@@ -9,7 +9,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Fix #1: Specify branch explicitly
                 git branch: 'main', url: 'https://github.com/Mayur2801/My-app2.git'
             }
         }
@@ -45,14 +44,25 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(['ec2-ssh-key']) {
-                    // Fix #2: Remove space before EC2 hostname
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@ec2-3-94-107-19.compute-1.amazonaws.com << EOF
+                        ssh -o StrictHostKeyChecking=no ec2-user@ec2-3-94-107-19.compute-1.amazonaws.com << 'EOF'
+                        # Install Docker if not already installed
+                        if ! command -v docker &> /dev/null; then
+                            echo "Docker not found. Installing Docker..."
+                            sudo yum update -y
+                            sudo amazon-linux-extras install docker -y
+                            sudo service docker start
+                            sudo usermod -aG docker ec2-user
+                        else
+                            echo "Docker already installed."
+                        fi
+
+                        # Pull and run the new image
                         docker pull $DOCKER_IMAGE:$VERSION
                         docker stop myapp || true
                         docker rm myapp || true
                         docker run -d --name myapp -p 80:80 $DOCKER_IMAGE:$VERSION
-                        EOF 
+                        EOF
                     """
                 }
             }
