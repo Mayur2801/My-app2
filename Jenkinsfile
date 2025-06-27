@@ -45,41 +45,41 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@ec2-3-94-107-19.compute-1.amazonaws.com << 'EOF'
-                        if ! command -v docker &> /dev/null; then
-                            echo "Docker not found. Installing Docker..."
+ssh -o StrictHostKeyChecking=no ec2-user@ec2-3-94-107-19.compute-1.amazonaws.com << 'EOF'
+if ! command -v docker &> /dev/null; then
+    echo "Docker not found. Installing Docker..."
 
-                            if [ -f /etc/os-release ]; then
-                                . /etc/os-release
-                                OS=\$ID
-                            fi
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=\$ID
+    fi
 
-                            if [ "\$OS" = "amzn" ]; then
-                                sudo yum update -y
-                                sudo yum install -y docker
-                                sudo systemctl start docker
-                                sudo systemctl enable docker
-                            elif [ "\$OS" = "ubuntu" ]; then
-                                sudo apt update -y
-                                sudo apt install -y docker.io
-                                sudo systemctl start docker
-                                sudo systemctl enable docker
-                            else
-                                echo "Unsupported OS. Manual Docker install may be required."
-                                exit 1
-                            fi
+    if [ "\$OS" = "amzn" ]; then
+        sudo yum update -y
+        sudo yum install -y docker
+        sudo systemctl start docker
+        sudo systemctl enable docker
+    elif [ "\$OS" = "ubuntu" ]; then
+        sudo apt update -y
+        sudo apt install -y docker.io
+        sudo systemctl start docker
+        sudo systemctl enable docker
+    else
+        echo "Unsupported OS. Manual Docker install may be required."
+        exit 1
+    fi
 
-                            sudo usermod -aG docker ec2-user
-                            echo "Docker installed successfully."
-                        else
-                            echo "Docker is already installed."
-                        fi
+    sudo usermod -aG docker ec2-user
+    echo "Docker installed successfully."
+else
+    echo "Docker is already installed."
+fi
 
-                        sudo docker pull $DOCKER_IMAGE:$VERSION
-                        sudo docker stop myapp || true
-                        sudo docker rm myapp || true
-                        sudo docker run -d --name myapp -p 80:80 $DOCKER_IMAGE:$VERSION
-                        EOF
+sudo docker pull $DOCKER_IMAGE:$VERSION
+sudo docker stop myapp || true
+sudo docker rm myapp || true
+sudo docker run -d --name myapp -p 80:80 $DOCKER_IMAGE:$VERSION
+EOF
                     """
                 }
             }
