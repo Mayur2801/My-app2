@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'DEPLOY_VERSION', defaultValue: '', description: 'Enter Docker image version to deploy (e.g. v1, v2, v3). Leave empty to skip deployment.')
+    }
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
         DOCKER_IMAGE = 'mayur2808/myapp'
@@ -16,7 +20,6 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    // Use Jenkins build number for versioning: v1, v2, v3, ...
                     env.VERSION = "v${env.BUILD_NUMBER}"
                     echo "Generated version: ${env.VERSION}"
                 }
@@ -41,7 +44,13 @@ pipeline {
         }
 
         stage('Deploy to EC2') {
+            when {
+                expression { return params.DEPLOY_VERSION?.trim() }
+            }
             steps {
+                script {
+                    echo "Deploying version: ${params.DEPLOY_VERSION}"
+                }
                 sshagent(['ec2-ssh-key']) {
                     sh """
 ssh -o StrictHostKeyChecking=no ec2-user@ec2-3-94-107-19.compute-1.amazonaws.com << 'EOF'
@@ -74,10 +83,10 @@ else
     echo "Docker is already installed."
 fi
 
-sudo docker pull $DOCKER_IMAGE:$VERSION
+sudo docker pull $DOCKER_IMAGE:${params.DEPLOY_VERSION}
 sudo docker stop myapp || true
 sudo docker rm myapp || true
-sudo docker run -d --name myapp -p 80:80 $DOCKER_IMAGE:$VERSION
+sudo docker run -d --name myapp -p 80:80 $DOCKER_IMAGE:${params.DEPLOY_VERSION}
 EOF
                     """
                 }
