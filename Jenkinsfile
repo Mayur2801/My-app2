@@ -16,9 +16,8 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    def shortCommit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-                    def timestamp = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
-                    env.VERSION = "${timestamp}-${shortCommit}"
+                    // Use Jenkins build number for versioning: v1, v2, v3, ...
+                    env.VERSION = "v${env.BUILD_NUMBER}"
                     echo "Generated version: ${env.VERSION}"
                 }
             }
