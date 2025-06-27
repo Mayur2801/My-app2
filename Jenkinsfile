@@ -75,10 +75,10 @@ pipeline {
                             echo "Docker is already installed."
                         fi
 
-                        docker pull $DOCKER_IMAGE:$VERSION
-                        docker stop myapp || true
-                        docker rm myapp || true
-                        docker run -d --name myapp -p 80:80 $DOCKER_IMAGE:$VERSION
+                        sudo docker pull $DOCKER_IMAGE:$VERSION
+                        sudo docker stop myapp || true
+                        sudo docker rm myapp || true
+                        sudo docker run -d --name myapp -p 80:80 $DOCKER_IMAGE:$VERSION
                         EOF
                     """
                 }
