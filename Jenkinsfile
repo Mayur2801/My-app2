@@ -9,7 +9,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Mayur2801/My-app2.git'
+                // Fix #1: Specify branch explicitly
+                git branch: 'main', url: 'https://github.com/Mayur2801/My-app2.git'
             }
         }
 
@@ -44,8 +45,9 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(['ec2-ssh-key']) {
+                    // Fix #2: Remove space before EC2 hostname
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@ ec2-3-94-107-19.compute-1.amazonaws.com << EOF
+                        ssh -o StrictHostKeyChecking=no ec2-user@ec2-3-94-107-19.compute-1.amazonaws.com << EOF
                         docker pull $DOCKER_IMAGE:$VERSION
                         docker stop myapp || true
                         docker rm myapp || true
