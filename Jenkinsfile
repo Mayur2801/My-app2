@@ -53,7 +53,7 @@ pipeline {
                 }
                 sshagent(['ec2-ssh-key']) {
                     sh """
-ssh -o StrictHostKeyChecking=no ec2-184-72-79-229.compute-1.amazonaws.com << 'EOF'
+ssh -o StrictHostKeyChecking=no ec2-44-201-193-120.compute-1.amazonaws.com << 'EOF'
 if ! command -v docker &> /dev/null; then
     echo "Docker not found. Installing Docker..."
 
